@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
@@ -37,17 +36,7 @@ func (l *stdLogger) Printf(format string, v ...any) {
 }
 
 func newWriterFromEnv() io.Writer {
-	dir := strings.TrimSpace(Env("LOG_DIR", ""))
-	if dir == "" {
-		return bufio.NewWriter(os.Stdout)
-	}
-	_ = os.MkdirAll(dir, 0o755)
-	name := time.Now().Format("http-20060102-150405.log")
-	f, err := os.Create(filepath.Join(dir, name))
-	if err != nil {
-		return bufio.NewWriter(os.Stdout)
-	}
-	return bufio.NewWriter(f)
+	return bufio.NewWriter(os.Stdout)
 }
 
 type LoggingTransport struct {
