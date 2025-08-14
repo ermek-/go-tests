@@ -2,40 +2,41 @@ package env
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-func LoadDotEnv(filename string) error {
-	dir, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-
-	for {
-		path := filepath.Join(dir, filename)
-		if err := loadFile(path); err == nil {
-			return nil
-		} else if !errors.Is(err, os.ErrNotExist) {
+func LoadDotEnv(name string) error {
+	path := name
+	if !filepath.IsAbs(name) {
+		wd, err := os.Getwd()
+		if err != nil {
 			return err
 		}
-
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			break
+		found := false
+		for {
+			candidate := filepath.Join(wd, name)
+			if _, err := os.Stat(candidate); err == nil {
+				path = candidate
+				found = true
+				break
+			}
+			parent := filepath.Dir(wd)
+			if parent == wd {
+				break
+			}
+			wd = parent
 		}
-		dir = parent
+		if !found {
+			return nil // .env not found – ignore silently
+		}
 	}
-	return fmt.Errorf("dotenv file %s not found", filename)
-}
 
-func loadFile(path string) error {
 	f, err := os.Open(path)
 	if err != nil {
-		return err
+		return fmt.Errorf("open env file: %w", err)
 	}
 	defer f.Close()
 
@@ -58,5 +59,5 @@ func loadFile(path string) error {
 			_ = os.Setenv(key, val)
 		}
 	}
-	return scanner.Err()
+	return nil
 }

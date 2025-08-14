@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"testing"
 
+	"go-api-tests/tests/helpers"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go-api-tests/tests/helpers"
