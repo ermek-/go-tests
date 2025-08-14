@@ -2,14 +2,41 @@ package env
 
 import (
 	"bufio"
+	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
-func LoadDotEnv(path string) error {
+func LoadDotEnv(name string) error {
+	path := name
+	if !filepath.IsAbs(name) {
+		wd, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+		found := false
+		for {
+			candidate := filepath.Join(wd, name)
+			if _, err := os.Stat(candidate); err == nil {
+				path = candidate
+				found = true
+				break
+			}
+			parent := filepath.Dir(wd)
+			if parent == wd {
+				break
+			}
+			wd = parent
+		}
+		if !found {
+			return nil // .env not found – ignore silently
+		}
+	}
+
 	f, err := os.Open(path)
 	if err != nil {
-		return nil
+		return fmt.Errorf("open env file: %w", err)
 	}
 	defer f.Close()
 

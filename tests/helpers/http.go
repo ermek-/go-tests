@@ -1,4 +1,4 @@
-package tests
+package helpers
 
 import (
 	"io"
@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func readAllAndClose(t *testing.T, resp *http.Response) []byte {
+func ReadAllAndClose(t *testing.T, resp *http.Response) []byte {
 	t.Helper()
 	defer func() { _ = resp.Body.Close() }()
 	b, err := io.ReadAll(resp.Body)
