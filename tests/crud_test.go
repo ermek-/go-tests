@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go-api-tests/tests/helpers"
 )
 
 type Product struct {
@@ -20,8 +21,8 @@ func TestCRUD_Product(t *testing.T) {
 	var createdID any
 
 	t.Run("Create", func(t *testing.T) {
-		code := fmt.Sprintf("code-%d", RandomNumber())
-		price := RandomNumber()
+		code := fmt.Sprintf("code-%d", helpers.RandomNumber())
+		price := helpers.RandomNumber()
 		p := Product{Code: code, Price: price}
 
 		resp, err := client.Do(http.MethodPost, nomenclaturesEndpoint, p)
@@ -32,7 +33,7 @@ func TestCRUD_Product(t *testing.T) {
 			"unexpected status: %d", resp.StatusCode,
 		)
 
-		body := readAllAndClose(t, resp)
+		body := helpers.ReadAllAndClose(t, resp)
 
 		var m map[string]any
 		require.NoErrorf(t, json.Unmarshal(body, &m), "invalid JSON: %s", string(body))
@@ -60,7 +61,7 @@ func TestCRUD_Product(t *testing.T) {
 
 		var p Product
 		// читаем тело 1 раз, затем decode
-		body := readAllAndClose(t, resp)
+		body := helpers.ReadAllAndClose(t, resp)
 		require.NoErrorf(t, json.Unmarshal(body, &p), "invalid JSON: %s", string(body))
 		assert.NotEmpty(t, p.Code, "product code should not be empty")
 	})
@@ -82,7 +83,7 @@ func TestCRUD_Product(t *testing.T) {
 		require.Equal(t, http.StatusOK, resp.StatusCode, "unexpected status")
 
 		var list []map[string]any
-		body := readAllAndClose(t, resp)
+		body := helpers.ReadAllAndClose(t, resp)
 		require.NoErrorf(t, json.Unmarshal(body, &list), "invalid list JSON: %s", string(body))
 		require.Greater(t, len(list), 0, "expected non-empty list")
 	})

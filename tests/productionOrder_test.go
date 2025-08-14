@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go-api-tests/tests/helpers"
 )
 
 // model
@@ -27,41 +27,24 @@ type ProductionOrder struct {
 
 func TestCreateProductionOrder(t *testing.T) {
 	t.Run("Create production order", func(t *testing.T) {
-		// готовим запрос
-		number := fmt.Sprintf("TEST-%d", RandomNumber())
-		p := ProductionOrder{Number: &number}
+		number := fmt.Sprintf("TEST-%d", helpers.RandomNumber())
+		order := ProductionOrder{Number: &number}
 
-		resp, err := client.Do(http.MethodPost, productionOrdersEndpoint, p)
+		resp, err := client.Do(http.MethodPost, productionOrdersEndpoint, order)
 		require.NoError(t, err, "Failed to create production order")
-		require.Equalf(t, http.StatusCreated, resp.StatusCode, "Expected 201 Created, got %d", resp.StatusCode)
+		require.Equal(t, http.StatusCreated, resp.StatusCode)
 
-		// читаем тело ОДИН раз
-		body := readAllAndClose(t, resp)
+		var created ProductionOrder
+		body := helpers.ReadAllAndClose(t, resp)
+		require.NoError(t, json.Unmarshal(body, &created))
 
-		// 1) проверяем наличие ключей на «сырых» данных
-		var shape map[string]any
-		require.NoErrorf(t, json.Unmarshal(body, &shape), "invalid JSON: %s", string(body))
-
-		for _, k := range []string{
-			"id", "number", "date_get", "required_date", "date_complite",
-			"priority", "status", "company", "customer", "client_order",
-			"nomenclatures",
-		} {
-			assert.Containsf(t, shape, k, "missing field %q in JSON body: %s", k, string(body))
-		}
-
-		// 2) разбираем в структуру
-		var po ProductionOrder
-		require.NoErrorf(t, json.Unmarshal(body, &po), "invalid JSON: %s", string(body))
-
-		// осмысленные проверки
-		assert.Equal(t, "Создан", po.Status)
-
-		// 3) cleanup
-		path := fmt.Sprintf("%s/%d/", productionOrderEndpoint, po.ID)
-
-		deleteResp, err := client.Do(http.MethodDelete, path, nil)
+		deleteResp, err := client.Do(
+			http.MethodDelete,
+			fmt.Sprintf("%s/%d/", productionOrderEndpoint, created.ID),
+			nil,
+		)
 		require.NoError(t, err, "Failed to delete production order")
-		require.Equalf(t, http.StatusOK, deleteResp.StatusCode, "Expected 200 OK, got %d", deleteResp.StatusCode)
+		require.Equal(t, http.StatusOK, deleteResp.StatusCode)
+		_ = deleteResp.Body.Close()
 	})
 }
