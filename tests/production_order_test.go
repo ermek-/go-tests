@@ -21,5 +21,11 @@ func TestCreateProductionOrder(t *testing.T) {
 	assert.NotZero(t, po.ID, "server must return non-zero id")
 	assert.Equal(t, "Создан", po.Status)
 
+	getResp, got := helpers.GetProductionOrder(t, client, productionOrderEndpoint, po.ID)
+	assert.Equal(t, http.StatusOK, getResp.StatusCode, "expected 200 OK on GET by id")
+	assert.Equal(t, po.ID, got.ID, "GET should return the same ID")
+	assert.Equal(t, number, got.Number, "GET should return the same Number")
+	assert.Equal(t, "Создан", got.Status, "status should match after create")
+
 	helpers.DeleteProductionOrder(t, client, productionOrderEndpoint, po.ID)
 }

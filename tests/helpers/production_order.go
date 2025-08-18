@@ -54,13 +54,26 @@ func CreateProductionOrder(
 	resp, err := c.Do(http.MethodPost, endpoint, body)
 	require.NoError(t, err, "failed to create production order")
 
-	// Читаем и закрываем тело внутри хелпера, чтобы распарсить структуру ответа.
 	b := ReadAllAndClose(t, resp)
 
 	var po CreatePOResponse
 	require.NoErrorf(t, json.Unmarshal(b, &po), "invalid JSON: %s", string(b))
 
-	// ВАЖНО: resp.Body уже закрыт.
+	return resp, po
+}
+
+func GetProductionOrder(t *testing.T, c *api.Client, endpoint string, id int) (*http.Response, CreatePOResponse) {
+	t.Helper()
+
+	path := fmt.Sprintf("%s/%d/", endpoint, id)
+	resp, err := c.Do(http.MethodGet, path, nil)
+	require.NoError(t, err, "failed to get production order")
+
+	b := ReadAllAndClose(t, resp)
+
+	var po CreatePOResponse
+	require.NoErrorf(t, json.Unmarshal(b, &po), "invalid JSON: %s", string(b))
+
 	return resp, po
 }
 
