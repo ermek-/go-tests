@@ -49,12 +49,7 @@ type CreateResponse struct {
 	Nomenclatures []interface{} `json:"nomenclatures,omitempty"`
 }
 
-func Create(
-	t *testing.T,
-	c *api.Client,
-	endpoint string,
-	body CreateRequest,
-) (*http.Response, CreateResponse) {
+func Create(t *testing.T, c *api.Client, endpoint string, body CreateRequest) (*http.Response, CreateResponse) {
 	t.Helper()
 
 	resp, err := c.Do(http.MethodPost, endpoint, body)
