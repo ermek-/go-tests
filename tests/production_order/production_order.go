@@ -1,4 +1,4 @@
-package productionorder
+package production_order
 
 import (
 	"encoding/json"
@@ -13,11 +13,11 @@ import (
 )
 
 const (
-	Endpoint          = "/ProductionOrder/v1/ProductionOrders"
-	EndpointWithSlash = Endpoint + "/"
+	Endpoint  = "/ProductionOrder/v1/ProductionOrders"
+	Endpoints = Endpoint + "/"
 )
 
-type CreatePORequest struct {
+type CreateRequest struct {
 	Number         *string `json:"number,omitempty"`
 	Name           *string `json:"name,omitempty"`
 	IsComposite    *bool   `json:"is_composite,omitempty"`
@@ -35,7 +35,7 @@ type CreatePORequest struct {
 	Dispatcher     *int    `json:"dispatcher,omitempty"`
 }
 
-type CreatePOResponse struct {
+type CreateResponse struct {
 	ID            int           `json:"id"`
 	Number        string        `json:"number"`
 	DateGet       *string       `json:"date_get,omitempty"`
@@ -49,12 +49,12 @@ type CreatePOResponse struct {
 	Nomenclatures []interface{} `json:"nomenclatures,omitempty"`
 }
 
-func CreateProductionOrder(
+func Create(
 	t *testing.T,
 	c *api.Client,
 	endpoint string,
-	body CreatePORequest,
-) (*http.Response, CreatePOResponse) {
+	body CreateRequest,
+) (*http.Response, CreateResponse) {
 	t.Helper()
 
 	resp, err := c.Do(http.MethodPost, endpoint, body)
@@ -62,13 +62,13 @@ func CreateProductionOrder(
 
 	b := helpers.ReadAllAndClose(t, resp)
 
-	var po CreatePOResponse
+	var po CreateResponse
 	require.NoErrorf(t, json.Unmarshal(b, &po), "invalid JSON: %s", string(b))
 
 	return resp, po
 }
 
-func GetProductionOrder(t *testing.T, c *api.Client, endpoint string, id int) (*http.Response, CreatePOResponse) {
+func Get(t *testing.T, c *api.Client, endpoint string, id int) (*http.Response, CreateResponse) {
 	t.Helper()
 
 	path := fmt.Sprintf("%s/%d/", endpoint, id)
@@ -77,13 +77,13 @@ func GetProductionOrder(t *testing.T, c *api.Client, endpoint string, id int) (*
 
 	b := helpers.ReadAllAndClose(t, resp)
 
-	var po CreatePOResponse
+	var po CreateResponse
 	require.NoErrorf(t, json.Unmarshal(b, &po), "invalid JSON: %s", string(b))
 
 	return resp, po
 }
 
-func DeleteProductionOrder(t *testing.T, c *api.Client, endpoint string, id int) {
+func Delete(t *testing.T, c *api.Client, endpoint string, id int) {
 	t.Helper()
 	path := fmt.Sprintf("%s/%d/", endpoint, id)
 	resp, err := c.Do(http.MethodDelete, path, nil)
