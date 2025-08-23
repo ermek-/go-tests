@@ -1,4 +1,4 @@
-package helpers
+package productionorder
 
 import (
 	"encoding/json"
@@ -7,8 +7,14 @@ import (
 	"testing"
 
 	"go-api-tests/internal/api"
+	"go-api-tests/tests/helpers"
 
 	"github.com/stretchr/testify/require"
+)
+
+const (
+	Endpoint          = "/ProductionOrder/v1/ProductionOrders"
+	EndpointWithSlash = Endpoint + "/"
 )
 
 type CreatePORequest struct {
@@ -54,7 +60,7 @@ func CreateProductionOrder(
 	resp, err := c.Do(http.MethodPost, endpoint, body)
 	require.NoError(t, err, "failed to create production order")
 
-	b := ReadAllAndClose(t, resp)
+	b := helpers.ReadAllAndClose(t, resp)
 
 	var po CreatePOResponse
 	require.NoErrorf(t, json.Unmarshal(b, &po), "invalid JSON: %s", string(b))
@@ -69,7 +75,7 @@ func GetProductionOrder(t *testing.T, c *api.Client, endpoint string, id int) (*
 	resp, err := c.Do(http.MethodGet, path, nil)
 	require.NoError(t, err, "failed to get production order")
 
-	b := ReadAllAndClose(t, resp)
+	b := helpers.ReadAllAndClose(t, resp)
 
 	var po CreatePOResponse
 	require.NoErrorf(t, json.Unmarshal(b, &po), "invalid JSON: %s", string(b))

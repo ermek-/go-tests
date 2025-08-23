@@ -9,11 +9,7 @@ import (
 )
 
 var (
-	client                   *api.Client
-	nomenclatureEndpoint     string
-	nomenclaturesEndpoint    string
-	productionOrderEndpoint  string
-	productionOrdersEndpoint string
+	client *api.Client
 )
 
 func TestMain(m *testing.M) {
@@ -22,11 +18,6 @@ func TestMain(m *testing.M) {
 	authEndpoint := api.Env("AUTH_ENDPOINT", "")
 	username := api.Env("USERNAME", "")
 	password := api.Env("PASSWORD", "")
-
-	nomenclatureEndpoint = "/Nomenclature/v1/nomenclatures"
-	nomenclaturesEndpoint = "/Nomenclature/v1/nomenclatures/"
-	productionOrderEndpoint = "/ProductionOrder/v1/ProductionOrders"
-	productionOrdersEndpoint = "/ProductionOrder/v1/ProductionOrders/"
 
 	client = api.NewClient(baseURL)
 
