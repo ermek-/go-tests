@@ -1,4 +1,4 @@
-package tests
+package productionorder
 
 import (
 	"os"
