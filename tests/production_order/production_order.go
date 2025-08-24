@@ -35,18 +35,27 @@ type CreateRequest struct {
 	Dispatcher     *int    `json:"dispatcher,omitempty"`
 }
 
+type Nomenclature struct {
+	ID          int      `json:"id"`
+	Name        string   `json:"name"`
+	IsComposite *bool    `json:"is_composite"`
+	ProdProcess int      `json:"prod_process"`
+	Count       int      `json:"count"`
+	Status      string   `json:"status"`
+	Batches     []string `json:"batches"`
+}
 type CreateResponse struct {
-	ID            int           `json:"id"`
-	Number        string        `json:"number"`
-	DateGet       *string       `json:"date_get,omitempty"`
-	RequiredDate  *string       `json:"required_date,omitempty"`
-	DateComplete  *string       `json:"date_complite,omitempty"`
-	Priority      *string       `json:"priority,omitempty"`
-	Status        string        `json:"status"`
-	Company       *string       `json:"company,omitempty"`
-	Customer      *string       `json:"customer,omitempty"`
-	ClientOrder   *string       `json:"client_order,omitempty"`
-	Nomenclatures []interface{} `json:"nomenclatures,omitempty"`
+	ID            int            `json:"id"`
+	Number        *string        `json:"number"`
+	DateGet       *string        `json:"date_get"`
+	RequiredDate  *string        `json:"required_date"`
+	DateComplete  *string        `json:"date_complite"`
+	Priority      *int           `json:"priority"`
+	Status        string         `json:"status"`
+	Company       *int           `json:"company"`
+	Customer      *string        `json:"customer"`
+	ClientOrder   *int           `json:"client_order"`
+	Nomenclatures []Nomenclature `json:"nomenclatures"`
 }
 
 func Create(t *testing.T, c *api.Client, endpoint string, body CreateRequest) (*http.Response, CreateResponse) {
@@ -63,7 +72,22 @@ func Create(t *testing.T, c *api.Client, endpoint string, body CreateRequest) (*
 	return resp, po
 }
 
-func Get(t *testing.T, c *api.Client, endpoint string, id int) (*http.Response, CreateResponse) {
+func GetList(t *testing.T, c *api.Client, endpoint string) (*http.Response, []byte, []CreateResponse) {
+	t.Helper()
+
+	path := fmt.Sprintf("%s/", endpoint)
+	resp, err := c.Do(http.MethodGet, path, nil)
+	require.NoError(t, err, "failed to GET production orders")
+
+	body := helpers.ReadAllAndClose(t, resp)
+
+	var list []CreateResponse
+	require.NoErrorf(t, json.Unmarshal(body, &list), "invalid JSON: %s", string(body))
+
+	return resp, body, list
+}
+
+func GetById(t *testing.T, c *api.Client, endpoint string, id int) (*http.Response, CreateResponse) {
 	t.Helper()
 
 	path := fmt.Sprintf("%s/%d/", endpoint, id)

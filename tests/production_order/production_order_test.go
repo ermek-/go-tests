@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateProductionOrder(t *testing.T) {
+func TestCreate(t *testing.T) {
 	c := helpers.TestClient(t)
 
 	number := fmt.Sprintf("TEST-%d", helpers.RandomNumber())
@@ -24,11 +24,25 @@ func TestCreateProductionOrder(t *testing.T) {
 	require.NotZero(t, po.ID, "server must return non-zero id")
 	require.Equal(t, "Создан", po.Status, "expected production order status to match")
 
-	getResp, got := Get(t, c, Endpoint, po.ID)
+	getResp, got := GetById(t, c, Endpoint, po.ID)
 	require.Equal(t, http.StatusOK, getResp.StatusCode, "expected 200 OK on GET by id")
 	assert.Equal(t, po.ID, got.ID, "GET should return the same ID")
 	assert.Equal(t, number, got.Number, "GET should return the same Number")
 	assert.Equal(t, "Создан", got.Status, "status should match after create")
 
 	t.Cleanup(func() { Delete(t, c, Endpoint, po.ID) })
+}
+
+func TestGetList(t *testing.T) {
+	c := helpers.TestClient(t)
+
+	resp, body, list := GetList(t, c, Endpoint)
+
+	require.Equal(t, http.StatusOK, resp.StatusCode, "expected 200 OK")
+	require.NotEmpty(t, list, "list must not be empty")
+	helpers.AssertAllObjectsHaveKeysJSON(t, body,
+		"id", "number", "date_get", "required_date", "date_complite",
+		"priority", "status", "company", "customer", "client_order", "nomenclatures",
+	)
+
 }
