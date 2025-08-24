@@ -72,6 +72,18 @@ func Create(t *testing.T, c *api.Client, endpoint string, body CreateRequest) (*
 	return resp, po
 }
 
+func Update(t *testing.T, c *api.Client, endpoint string, body CreateRequest, id int) *http.Response {
+	t.Helper()
+
+	path := fmt.Sprintf("%s/%d/", endpoint, id)
+	resp, err := c.Do(http.MethodPut, path, body)
+	require.NoError(t, err, "failed to update production order")
+
+	_ = resp.Body.Close()
+
+	return resp
+}
+
 func GetList(t *testing.T, c *api.Client, endpoint string) (*http.Response, []byte, []CreateResponse) {
 	t.Helper()
 
