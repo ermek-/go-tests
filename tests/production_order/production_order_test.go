@@ -56,5 +56,18 @@ func TestUpdate(t *testing.T) {
 	updResp := Update(t, c, Endpoint, updReq, po.ID)
 	require.Equal(t, http.StatusOK, updResp.StatusCode, "expected 200 OK on update")
 
+	getResp, got := GetById(t, c, Endpoint, po.ID)
+	require.Equal(t, http.StatusOK, getResp.StatusCode, "expected 200 OK on GET by id")
+	assert.Equal(t, updNumber, *got.Number, "GET should return the same Number")
+
+	editNumber := fmt.Sprintf("%d", helpers.RandomNumber())
+	editReq := CreateRequest{Number: &editNumber}
+	editResp := Edit(t, c, Endpoint, editReq, po.ID)
+	require.Equal(t, http.StatusOK, editResp.StatusCode, "expected 200 OK on edit")
+
+	getResp2, got := GetById(t, c, Endpoint, po.ID)
+	require.Equal(t, http.StatusOK, getResp2.StatusCode, "expected 200 OK on GET by id")
+	assert.Equal(t, editNumber, *got.Number, "GET should return the same Number")
+
 	t.Cleanup(func() { Delete(t, c, Endpoint, po.ID) })
 }
